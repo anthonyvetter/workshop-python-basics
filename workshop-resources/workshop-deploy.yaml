@@ -1,0 +1,64 @@
+# Follow the TODOs below for initial items to change. If you are unfamiliar with what values to use
+# or would like more information in general about the format of this file, refer to the Educates docs:
+#  https://docs.edukates.io/en/latest/runtime-environment/workshop-definition.html
+apiVersion: training.eduk8s.io/v1alpha2
+kind: Workshop
+metadata:
+  name: edu-educates-template #TODO - change to match NAME from Makefile.env
+spec:
+  title: My Workshop #TODO - update to be a title appropriate for you workshop
+  description: My Workshop Description #TODO - update to be a description appropriate for you workshop
+  vendor: eduk8s.io #TODO - update to your organization
+  difficulty: beginner #TODO - update to what difficulty 
+  duration: 120m #TODO - update to the estimate time you think the learner needs to complete the workshop
+  url: https://github.com/vmware-tanzu-private/edu-educates-template # TODO - the URL of your GitHub repo
+  content:
+    # Use the default image one of the pre-existing ones, or you can build your own
+    # https://docs.edukates.io/en/develop/runtime-environment/workshop-definition.html#container-image-for-the-workshop
+    image: base-environment:*
+    files: $(ingress_protocol)://files.$(workshop_namespace).svc.cluster.local/workshop.tar.gz
+  session:
+    applications:
+      terminal:
+        enabled: true
+        layout: split
+    #dashboards:
+    # Video content can be added by linking to a Vimeo Showcase
+    #- name: Lecture
+      # url: https://vimeo.com/showcase/6259448/embed
+  environment:
+    objects:
+    - apiVersion: v1
+      kind: Service
+      metadata:
+        name: files
+        namespace: $(workshop_namespace)
+      spec:
+        type: ClusterIP
+        ports:
+        - port: 80
+          protocol: TCP
+          targetPort: 8080
+        selector:
+          deployment: files
+    - apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: files
+        namespace: $(workshop_namespace)
+      spec:
+        replicas: 1
+        selector:
+          matchLabels:
+            deployment: files
+        strategy:
+          type: Recreate
+        template:
+          metadata:
+            labels:
+              deployment: files
+          spec:
+            containers:
+            - name: instructions
+              image: edu-educates-template #TODO - change to match NAME from Makefile.env
+              # NOTE: always make sure your workshop YAML ends with the files deployment

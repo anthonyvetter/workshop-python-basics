@@ -1,0 +1,17 @@
+# See https://docs.edukates.io/en/latest/runtime-environment/training-portal.html
+apiVersion: training.eduk8s.io/v1alpha1
+kind: TrainingPortal
+metadata:
+  name: edu-educates-template #TODO - change to match NAME from Makefile.env
+spec:
+  portal:
+    registration:
+      type: anonymous
+    updates:
+      workshop: true
+  workshops:
+  - name: edu-educates-template #TODO - change to match NAME from Makefile.env
+    capacity: 1
+    reserved: 0
+    expires: 180m
+    orphaned: 5m
